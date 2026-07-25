@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAU Library</title>
+<style>
+:root{
+  --ink:#101010; --paper:#fff; --surface:#f5f5f3; --line:#e3e3df; --muted:#6d6d68;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --radius:8px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+input{font:inherit}
+.hidden{display:none !important}
+
+.wordmark{font-size:19px;font-weight:600;letter-spacing:-.02em;margin:0}
+.wordmark span{font-weight:400;color:var(--muted)}
+
+.gate{min-height:100vh;display:grid;place-items:center;padding:1.5rem}
+.gate-card{width:100%;max-width:380px;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:2rem;display:flex;flex-direction:column;gap:14px}
+.gate-note{margin:-6px 0 6px;color:var(--muted);font-size:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field span{font-size:13px;color:var(--muted)}
+.field input{height:40px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper);color:var(--ink)}
+.field input:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+.primary{height:42px;border:0;border-radius:var(--radius);background:var(--ink);color:var(--paper);
+  font-weight:500;width:100%}
+.primary:disabled{opacity:.55;cursor:default}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px}
+.link:hover{color:var(--ink)}
+.error{color:#a32d2d;font-size:13px;margin:0}
+.notice{color:var(--muted);font-size:13px;margin:0}
+
+.app{max-width:1080px;margin:0 auto;padding:0 1.5rem 5rem}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.25rem 0;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar-right{display:flex;align-items:center;gap:12px;font-size:13px}
+.who{color:var(--muted)}
+.controls{padding:1.5rem 0 1rem;display:flex;flex-direction:column;gap:14px}
+.search{width:100%;height:46px;padding:0 16px;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--paper);font-size:16px}
+.search:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;
+  font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
+.chip:hover{border-color:#c9c9c3;color:var(--ink)}
+.chip-on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip b{font-weight:500;opacity:.7}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.count{color:var(--muted);font-size:13px;margin:0 0 14px}
+
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(178px,1fr))}
+.card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;cursor:pointer;transition:border-color .15s ease,transform .15s ease}
+.card:hover{border-color:#c9c9c3;transform:translateY(-2px)}
+.cover{height:132px;position:relative;display:flex;align-items:flex-end;padding:12px}
+.cover::after{content:'';position:absolute;left:9px;top:0;bottom:0;width:1px;background:rgba(255,255,255,.35)}
+.cover-title{font-family:var(--serif);font-size:14px;line-height:1.25;color:#fff;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+  text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.meta{padding:11px 13px 14px}
+.meta h2{font-family:var(--serif);font-size:15px;font-weight:400;margin:0 0 3px;line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta p{margin:0;font-size:12.5px;color:var(--muted)}
+.meta .fine{margin-top:5px;font-size:12px;color:#96968f}
+.save{position:absolute;top:8px;right:8px;width:28px;height:28px;border:0;border-radius:50%;
+  background:rgba(255,255,255,.9);color:var(--ink);font-size:15px;line-height:1}
+.save:hover{background:#fff}
+.save-on{color:#b8860b}
+.empty{padding:3rem 0;text-align:center;color:var(--muted)}
+.pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:2.5rem 0 0;font-size:14px}
+.pager button{border:1px solid var(--line);background:var(--paper);border-radius:var(--radius);padding:7px 14px}
+.pager button:disabled{opacity:.4;cursor:default}
+
+.sheet{position:fixed;inset:0;background:rgba(16,16,16,.45);display:grid;place-items:center;
+  padding:1.5rem;z-index:10}
+.sheet-card{background:var(--paper);border-radius:12px;max-width:460px;width:100%;max-height:88vh;
+  overflow:auto;position:relative}
+.close{position:absolute;top:10px;right:12px;width:30px;height:30px;border:0;border-radius:50%;
+  background:rgba(255,255,255,.9);font-size:20px;line-height:1}
+.sheet-cover{height:170px;display:flex;align-items:flex-end;padding:18px;position:relative}
+.sheet-cover::after{content:'';position:absolute;left:12px;top:0;bottom:0;width:1px;background:rgba(255,255,255,.35)}
+.sheet-cover .cover-title{font-size:19px;-webkit-line-clamp:3}
+.sheet-body{padding:20px;display:flex;flex-direction:column;gap:14px}
+.sheet-body h2{font-family:var(--serif);font-size:21px;font-weight:400;margin:0;line-height:1.25}
+.byline{margin:-10px 0 0;color:var(--muted);font-size:14px}
+.facts{margin:0;display:grid;gap:7px}
+.facts>div{display:flex;justify-content:space-between;font-size:13.5px;
+  border-bottom:1px solid var(--line);padding-bottom:6px}
+.facts dt{color:var(--muted);margin:0}
+.facts dd{margin:0}
+.cite{font-size:12.5px;color:var(--muted);background:var(--surface);padding:11px 13px;
+  border-radius:var(--radius);margin:0}
+.cite b{color:var(--ink);font-weight:500}
+
+@media(max-width:560px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:14px}
+  .cover{height:110px}
+  .who{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div id="root"><div style="padding:4rem;text-align:center;color:#6d6d68">Loading</div></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+/* ====================================================================
+   FILL IN THESE TWO LINES. Everything else is already set up.
+   ==================================================================== */
+
+// 1. Supabase → Settings → API Keys → Publishable key (starts with sb_publishable_)
+const SUPABASE_KEY = 'sb_publishable_0cu8v9o8W9c3UIeTf7sbUQ_XHIcRGQ_'
+
+// 2. The address of your download Worker, e.g. https://cau-library-download.yourname.workers.dev
+const WORKER_URL = 'https://cau-library-download.bashirov-amal2.workers.dev'
+
+/* ==================================================================== */
+
+const SUPABASE_URL = 'https://dpebazpmhsbwmdzxacpu.supabase.co'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+const root = document.getElementById('root')
+const PAGE = 24
+
+const state = {
+  session: null, schools: [], schoolById: {},
+  books: [], total: 0, page: 0,
+  school: null, term: '', saved: new Set(), onlySaved: false,
+  loading: true, open: null, authMode: 'in'
+}
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
+/* -------------------------------------------------------------------- auth */
+function renderGate(msg = '', notice = '') {
+  const up = state.authMode === 'up'
+  root.innerHTML = `
+    <div class="gate">
+      <form class="gate-card" id="gate">
+        <h1 class="wordmark">CAU <span>Library</span></h1>
+        <p class="gate-note">201 textbooks across six schools. Open to Central Asian University accounts.</p>
+        ${up ? `<label class="field"><span>Full name</span>
+          <input name="name" required autocomplete="name"></label>` : ''}
+        <label class="field"><span>University email</span>
+          <input name="email" type="email" required autocomplete="email"
+                 placeholder="123456@centralasian.uz"></label>
+        <label class="field"><span>Password</span>
+          <input name="password" type="password" required minlength="8"
+                 autocomplete="${up ? 'new-password' : 'current-password'}"></label>
+        ${msg ? `<p class="error">${esc(msg)}</p>` : ''}
+        ${notice ? `<p class="notice">${esc(notice)}</p>` : ''}
+        <button class="primary" id="go">${up ? 'Create account' : 'Sign in'}</button>
+        <button type="button" class="link" id="swap">
+          ${up ? 'Already registered? Sign in' : 'No account yet? Create one'}</button>
+      </form>
+    </div>`
+
+  document.getElementById('swap').onclick = () => {
+    state.authMode = up ? 'in' : 'up'; renderGate()
+  }
+  document.getElementById('gate').onsubmit = async e => {
+    e.preventDefault()
+    const f = new FormData(e.target)
+    const email = f.get('email'), password = f.get('password')
+    const btn = document.getElementById('go')
+    btn.disabled = true; btn.textContent = 'Working'
+    const { error } = up
+      ? await supabase.auth.signUp({ email, password, options: { data: { full_name: f.get('name') } } })
+      : await supabase.auth.signInWithPassword({ email, password })
+    if (error) return renderGate(readable(error.message))
+    if (up) renderGate('', `Check ${email} for a confirmation link, then sign in.`)
+  }
+}
+
+function readable(m) {
+  if (m.includes('Central Asian University')) return 'Sign in with your @centralasian.uz address.'
+  if (m.includes('Invalid login')) return 'That email and password do not match.'
+  if (m.includes('already registered')) return 'This account already exists. Sign in instead.'
+  if (m.includes('Email not confirmed')) return 'Confirm your email first, then sign in.'
+  return m
+}
+
+/* ----------------------------------------------------------------- catalog */
+async function loadBooks() {
+  state.loading = true; paint()
+  let q = supabase.from('books')
+    .select('id,title,authors,language,school_id,file_size,page_count,published_year', { count: 'exact' })
+  if (state.school) q = q.eq('school_id', state.school)
+  if (state.term) q = q.or(`title.ilike.%${state.term}%,authors.ilike.%${state.term}%`)
+  if (state.onlySaved) {
+    const ids = [...state.saved]
+    q = q.in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000'])
+  }
+  const { data, count } = await q.order('title').range(state.page * PAGE, state.page * PAGE + PAGE - 1)
+  state.books = data || []; state.total = count || 0; state.loading = false
+  paint()
+}
+
+function paint() {
+  const s = state
+  const pages = Math.ceil(s.total / PAGE)
+  root.innerHTML = `
+    <div class="app">
+      <header class="bar">
+        <h1 class="wordmark">CAU <span>Library</span></h1>
+        <div class="bar-right">
+          <button class="chip${s.onlySaved ? ' chip-on' : ''}" data-saved>Saved${
+            s.saved.size ? ` <b>${s.saved.size}</b>` : ''}</button>
+          <span class="who">${esc(s.session.user.email)}</span>
+          <button class="link" data-out>Sign out</button>
+        </div>
+      </header>
+
+      <div class="controls">
+        <input class="search" id="q" placeholder="Search by title or author" value="${esc(s.term)}">
+        <div class="chips">
+          <button class="chip${s.school === null ? ' chip-on' : ''}" data-school="">All</button>
+          ${s.schools.map(x => `<button class="chip${s.school === x.id ? ' chip-on' : ''}"
+            data-school="${x.id}"><i class="dot" style="background:${esc(x.accent)}"></i>${
+            esc(x.name.replace(' School', ''))}</button>`).join('')}
+        </div>
+      </div>
+
+      <p class="count">${s.loading ? 'Searching'
+        : s.total === 0 ? 'Nothing matches that search'
+        : `${s.total} ${s.total === 1 ? 'book' : 'books'}`}</p>
+
+      <div class="grid">${s.books.map(card).join('')}</div>
+
+      ${!s.loading && s.total === 0 ? `<div class="empty">
+        <p>No book here yet. Ask the library team to add it, or try a shorter search.</p></div>` : ''}
+
+      ${pages > 1 ? `<nav class="pager">
+        <button data-page="${s.page - 1}" ${s.page === 0 ? 'disabled' : ''}>Previous</button>
+        <span>${s.page + 1} of ${pages}</span>
+        <button data-page="${s.page + 1}" ${s.page + 1 >= pages ? 'disabled' : ''}>Next</button>
+      </nav>` : ''}
+    </div>
+    ${s.open ? sheet(s.open) : ''}`
+
+  wire()
+}
+
+function card(b) {
+  const sc = state.schoolById[b.school_id] || {}
+  const fine = [
+    b.page_count ? `${b.page_count} pp` : 'PDF',
+    b.published_year || null,
+    b.language !== 'en' ? b.language.toUpperCase() : null
+  ].filter(Boolean).join(' · ')
+  return `<article class="card" data-open="${b.id}">
+    <div class="cover" style="background:${esc(sc.accent || '#888780')}">
+      <span class="cover-title">${esc(b.title)}</span></div>
+    <div class="meta">
+      <h2>${esc(b.title)}</h2>
+      <p>${esc(b.authors || sc.name || '')}</p>
+      <p class="fine">${esc(fine)}</p>
+    </div>
+    <button class="save${state.saved.has(b.id) ? ' save-on' : ''}" data-save="${b.id}"
+      aria-label="${state.saved.has(b.id) ? 'Remove from saved' : 'Save'}">${
+      state.saved.has(b.id) ? '★' : '☆'}</button>
+  </article>`
+}
+
+function sheet(b) {
+  const sc = state.schoolById[b.school_id] || {}
+  return `<div class="sheet" data-close>
+    <div class="sheet-card">
+      <button class="close" data-close aria-label="Close">×</button>
+      <div class="sheet-cover" style="background:${esc(sc.accent || '#888780')}">
+        <span class="cover-title">${esc(b.title)}</span></div>
+      <div class="sheet-body">
+        <h2>${esc(b.title)}</h2>
+        ${b.authors ? `<p class="byline">${esc(b.authors)}</p>` : ''}
+        <dl class="facts">
+          <div><dt>Collection</dt><dd>${esc(sc.name || '')}</dd></div>
+          ${b.published_year ? `<div><dt>Published</dt><dd>${b.published_year}</dd></div>` : ''}
+          ${b.page_count ? `<div><dt>Pages</dt><dd>${b.page_count}</dd></div>` : ''}
+          <div><dt>Size</dt><dd>${(b.file_size / 1048576).toFixed(1)} MB</dd></div>
+        </dl>
+        <button class="primary" data-dl="${b.id}">Open PDF</button>
+        <p class="error hidden" id="dlerr"></p>
+        <p class="cite"><b>Citation</b><br>
+          ${b.authors ? esc(b.authors) + '. ' : ''}<i>${esc(b.title)}</i>${
+          b.published_year ? ', ' + b.published_year : ''}. Central Asian University Library.</p>
+      </div>
+    </div>
+  </div>`
+}
+
+/* ------------------------------------------------------------------ events */
+let timer
+function wire() {
+  const q = document.getElementById('q')
+  if (q) {
+    q.oninput = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        state.term = q.value.trim(); state.page = 0; loadBooks()
+      }, 250)
+    }
+  }
+
+  document.querySelectorAll('[data-school]').forEach(el => el.onclick = () => {
+    state.school = el.dataset.school ? Number(el.dataset.school) : null
+    state.page = 0; loadBooks()
+  })
+  document.querySelectorAll('[data-page]').forEach(el => el.onclick = () => {
+    state.page = Number(el.dataset.page); loadBooks(); window.scrollTo(0, 0)
+  })
+  const sv = document.querySelector('[data-saved]')
+  if (sv) sv.onclick = () => { state.onlySaved = !state.onlySaved; state.page = 0; loadBooks() }
+  const out = document.querySelector('[data-out]')
+  if (out) out.onclick = () => supabase.auth.signOut()
+
+  document.querySelectorAll('[data-save]').forEach(el => el.onclick = async e => {
+    e.stopPropagation()
+    const id = el.dataset.save
+    if (state.saved.has(id)) {
+      state.saved.delete(id)
+      await supabase.from('bookmarks').delete().eq('book_id', id).eq('user_id', state.session.user.id)
+    } else {
+      state.saved.add(id)
+      await supabase.from('bookmarks').insert({ book_id: id, user_id: state.session.user.id })
+    }
+    paint()
+  })
+
+  document.querySelectorAll('[data-open]').forEach(el => el.onclick = () => {
+    state.open = state.books.find(b => b.id === el.dataset.open); paint()
+  })
+  document.querySelectorAll('[data-close]').forEach(el => el.onclick = e => {
+    if (e.target === el) { state.open = null; paint() }
+  })
+
+  const dl = document.querySelector('[data-dl]')
+  if (dl) dl.onclick = () => download(dl)
+}
+
+async function download(btn) {
+  const err = document.getElementById('dlerr')
+  err.classList.add('hidden')
+  if (!WORKER_URL) {
+    err.textContent = 'Downloads are not switched on yet.'
+    err.classList.remove('hidden'); return
+  }
+  const tab = window.open('', '_blank')
+  btn.disabled = true; btn.textContent = 'Preparing'
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    const r = await fetch(`${WORKER_URL.replace(/\/$/, '')}/ticket`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ book_id: btn.dataset.dl })
+    })
+    const out = await r.json()
+    if (!r.ok || !out.ticket) throw new Error(out.error || 'failed')
+    tab.location = `${WORKER_URL.replace(/\/$/, '')}/file?t=${encodeURIComponent(out.ticket)}`
+  } catch (e) {
+    if (tab) tab.close()
+    err.textContent = 'Could not open that file. Try again in a moment.'
+    err.classList.remove('hidden')
+  }
+  btn.disabled = false; btn.textContent = 'Open PDF'
+}
+
+/* -------------------------------------------------------------------- boot */
+async function start(session) {
+  state.session = session
+  const [{ data: schools }, { data: marks }] = await Promise.all([
+    supabase.from('schools').select('*').order('sort_order'),
+    supabase.from('bookmarks').select('book_id')
+  ])
+  state.schools = schools || []
+  state.schoolById = Object.fromEntries(state.schools.map(s => [s.id, s]))
+  state.saved = new Set((marks || []).map(m => m.book_id))
+  loadBooks()
+}
+
+const { data: { session } } = await supabase.auth.getSession()
+session ? start(session) : renderGate()
+supabase.auth.onAuthStateChange((_e, s) => {
+  if (s && !state.session) start(s)
+  if (!s) { state.session = null; renderGate() }
+})
+</script>
+</body>
+</html>
